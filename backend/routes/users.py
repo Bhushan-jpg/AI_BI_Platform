@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
+from auth import verify_token
 
 from schemas import UserCreate, UserLogin
 from auth import hash_password, verify_password, create_access_token
@@ -53,4 +54,11 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
     return {
         "access_token": token,
         "token_type": "bearer"
+    }
+
+@router.get("/dashboard")
+def dashboard(current_user: str = Depends(verify_token)):
+
+    return {
+        "message": f"Welcome {current_user}"
     }

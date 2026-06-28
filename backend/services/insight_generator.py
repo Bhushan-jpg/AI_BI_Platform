@@ -1,75 +1,53 @@
 import pandas as pd
 
 
-def generate_insights(df, analysis):
+def generate_insights(df):
 
     insights = []
 
     # Dataset Overview
     insights.append(
-        f"Dataset contains {analysis['rows']} rows and {analysis['columns']} columns."
+        f"Dataset contains {df.shape[0]} rows and {df.shape[1]} columns."
     )
 
-    insights.append(
-        f"There are {analysis['duplicates']} duplicate records."
-    )
+    # Missing Values
+    missing = int(df.isnull().sum().sum())
 
-    insights.append(
-        f"There are {analysis['missing_values']} missing values."
-    )
-
-    # Column Insights
-    for col in analysis["column_info"]:
-
-        if col["type"] == "numeric":
-
-            insights.append(
-                f"'{col['name']}' is a numeric column with {col['unique_values']} unique values."
-            )
-
-        elif col["type"] == "categorical":
-
-            insights.append(
-                f"'{col['name']}' has {col['unique_values']} unique categories."
-            )
-
-        elif col["type"] == "datetime":
-
-            insights.append(
-                f"'{col['name']}' is identified as a date column."
-            )
-
-    # Missing Data
-    missing_cols = []
-
-    for c in df.columns:
-
-        if df[c].isnull().sum() > 0:
-
-            missing_cols.append(c)
-
-    if missing_cols:
-
+    if missing == 0:
         insights.append(
-            "Columns containing missing values: "
-            + ", ".join(missing_cols)
+            "No missing values found in the dataset."
+        )
+    else:
+        insights.append(
+            f"Dataset contains {missing} missing values."
         )
 
-    # Numeric Statistics
-    numeric_cols = df.select_dtypes(include="number").columns
+    # Duplicate Rows
+    duplicates = int(df.duplicated().sum())
 
-    for col in numeric_cols:
-
+    if duplicates == 0:
         insights.append(
-
-            f"{col}: "
-
-            f"Min={df[col].min()}, "
-
-            f"Max={df[col].max()}, "
-
-            f"Mean={round(df[col].mean(),2)}"
-
+            "No duplicate records found."
         )
+    else:
+        insights.append(
+            f"{duplicates} duplicate rows detected."
+        )
+
+    # Numeric Summary
+    numeric_cols = df.select_dtypes(include=["number"]).columns
+
+    if len(numeric_cols) > 0:
+
+        for col in numeric_cols:
+
+            insights.append(
+                f"{col}: Average = {round(df[col].mean(),2)}"
+            )
+
+    # Recommendation
+    insights.append(
+        "Review missing values and focus on the highest-performing metrics for better business decisions."
+    )
 
     return insights
